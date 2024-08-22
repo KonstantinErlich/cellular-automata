@@ -1,7 +1,19 @@
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 import ast
 import inspect
+import sys
+
+def running_in_terminal():
+    """Determine if the script is running in a terminal or an IDE."""
+    # Check if sys.stdin is a terminal
+    return sys.stdin.isatty() and sys.stdout.isatty()
+
+# Use TkAgg backend only if running in a terminal
+if running_in_terminal():
+    matplotlib.use('TkAgg')
+
 
 
 def scan_functions_in_current_file():
