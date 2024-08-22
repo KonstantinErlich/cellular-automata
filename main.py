@@ -1,5 +1,28 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import ast
+import inspect
+
+
+def scan_functions_in_current_file():
+    # Get the current file's source code
+    current_file = inspect.getsource(inspect.currentframe().f_back)
+
+    # Parse the source code into an AST
+    tree = ast.parse(current_file)
+
+    # List to store function names that start with "rule"
+    rule_functions = []
+
+    # Iterate through the nodes of the AST
+    for node in ast.walk(tree):
+        # Check if the node is a function definition
+        if isinstance(node, ast.FunctionDef):
+            # Add the function name to the list if it starts with "rule"
+            if node.name.startswith("rule"):
+                rule_functions.append(node.name)
+
+    return rule_functions
 
 title = ""
 # Parameters
@@ -18,7 +41,6 @@ grid[0, midpoint] = 1  # Start with the middle cell black
 
 def condition(i, j, a, b, c):
     return grid[i - 1, j - 1] == a and grid[i - 1, j] == b and grid[i - 1, j + 1] == c
-
 
 # rules:
 def rule_1():
@@ -72,8 +94,31 @@ def rule_107():
                 grid[i, j] = 1
 
 
-# call the rule you want to be plotted by calling the corresponding function
-rule_107()
+#functionality to type rule number to plot it
+print("available rules: ")
+print("Found rules: " + ", ".join(scan_functions_in_current_file()).replace("rule_", ""))
+
+while True:
+    code = int(input("type the number of the rule you want to plot: "))
+    match code:
+        case 1:
+            rule_1()
+            break
+        case 2:
+            rule_2()
+            break
+        case 3:
+            rule_3()
+            break
+        case 22:
+            rule_22()
+            break
+        case 107:
+            rule_107()
+            break
+        case _:
+            print("invalid value, rule not found")
+
 
 # Plotting the grid
 plt.figure(figsize=(20, 20))
