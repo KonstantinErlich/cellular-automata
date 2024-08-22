@@ -2,16 +2,57 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # Parameters
-width = 21  # Width of the grid (must be odd for a clear center)
-steps = 20  # Number of steps
+width = 201  # Width of the grid (must be odd for a clear center)
+steps = 200  # Number of steps
 
 # Initialize the grid
 grid = np.zeros((steps, width), dtype=int)
 midpoint = width // 2
+grid[0, midpoint] = 1  # Start with the middle cell black
 
 
+# the indexes in grid[i,j] mean the following:
+# i is the time step, goes down in the plot.
+# j is the position of the cell, j+1 is right neighbor, j-1 is left neighbor
+
+
+#rules:
+def rule_1():
+    for i in range(1, steps):
+        for j in range(1, width - 1):
+            if grid[i - 1, j + 1] == 0 and grid[i-1, j-1] == 0 and grid[i-1, j] == 0:
+                grid[i, j] = 1
+
+def rule_2():
+    for i in range(1, steps):
+        for j in range(1, width - 1):
+            if grid[i-1, j+1] != 0:
+                grid[i, j] = 1
+def rule_3():
+    for i in range(1, steps):
+        for j in range(1, width - 1):
+            if grid[i-1, j-1] == 0 and grid[i-1, j] == 0:
+                grid[i, j] = 1
+
+def rule_22():
+    for i in range(1, steps):
+        for j in range(1, width - 1):
+            if ((grid[i-1, j-1] == 0 and grid[i-1, j] != 0 and grid[i-1, j+1] == 0) or
+                    (grid[i-1, j-1] == 0 and grid[i-1, j] == 0 and grid[i-1, j+1] != 0) or
+                    grid[i - 1, j - 1] != 0 and grid[i - 1, j] == 0 and grid[i - 1, j + 1] == 0  ):
+                grid[i, j] = 1
+
+def rule_107():
+    for i in range(1, steps):
+        for j in range(1, width - 1):
+            if (grid[i-1, j-1] != 0 and grid[i-1, j] != 0 and grid[i-1, j+1] == 0) or (grid[i-1, j-1] != 0 and grid[i-1, j] == 0 and grid[i-1, j+1] != 0) or (grid[i - 1, j - 1] == 0 and grid[i - 1, j] != 0 and grid[i - 1, j + 1] != 0)  or (grid[i - 1, j - 1] == 0 and grid[i - 1, j] == 0 and grid[i - 1, j + 1] != 0) or (grid[i - 1, j - 1] == 0 and grid[i - 1, j] == 0 and grid[i - 1, j + 1] == 0):
+                grid[i, j] = 1
+
+
+#call the rule you want to be plotted by calling the corresponding function
+rule_107()
 # Plotting the grid
-plt.figure(figsize=(10, 10))
+plt.figure(figsize=(20, 20))
 plt.imshow(grid, cmap='binary', interpolation='nearest')
 plt.title('1D Cellular Automaton')
 plt.show()
