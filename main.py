@@ -79,6 +79,44 @@ class automata():
                 if self.condition(i, j, 0, 0, 0):
                     self.grid[i, j] = 1
 
+    def rule_2(self):
+        global title
+        title = "rule 2"
+        for i in range(1, self.steps):
+            for j in range(1, self.width - 1):
+                if self.grid[i - 1, j + 1] != 0:
+                    self.grid[i, j] = 1
+
+    def rule_3(self):
+        global title
+        title = "rule 3"
+        for i in range(1, self.steps):
+            for j in range(1, self.width - 1):
+                if self.grid[i - 1, j - 1] == 0 and self.grid[i - 1, j] == 0:
+                    self.grid[i, j] = 1
+
+    def rule_22(self):
+        global title
+        title = "rule 22"
+        for i in range(1, self.steps):
+            for j in range(1, self.width - 1):
+                if (self.condition(i, j, 0, 1, 0) or
+                        self.condition(i, j, 0, 0, 1) or
+                        self.condition(i, j, 1, 0, 0)):
+                    self.grid[i, j] = 1
+
+    def rule_107(self):
+        global title
+        title = "rule 107"
+        for i in range(1, self.steps):
+            for j in range(1, self.width - 1):
+                if (self.condition(i, j, 1, 1, 0) or
+                        self.condition(i, j, 1, 0, 1) or
+                        self.condition(i, j, 0, 1, 1) or
+                        self.condition(i, j, 0, 0, 1) or
+                        self.condition(i, j, 0, 0, 0)):
+                    self.grid[i, j] = 1
+
     def plot_grid(self):
         plt.figure(figsize=(20, 20))
         plt.imshow(self.grid, cmap='binary', interpolation='nearest')
@@ -93,6 +131,18 @@ class automata():
             match self.code:
                 case 1:
                     self.rule_1()
+                    break
+                case 2:
+                    self.rule_2()
+                    break
+                case 3:
+                    self.rule_3()
+                    break
+                case 22:
+                    self.rule_22()
+                    break
+                case 107:
+                    self.rule_107()
                     break
                 case _:
                     print("invalid value, rule not found")
@@ -110,8 +160,6 @@ class automata():
 
         # Print the method names separated by commas
         print("available methods:" + ", ".join(method_names))
-
-
 
 
 ca = automata()
