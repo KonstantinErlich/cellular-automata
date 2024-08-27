@@ -20,19 +20,20 @@ class automata():
         self.width = 0
         self.steps = 0
         self.starting_state = 1
-        self.probability = -0.9
+        self.starting_label = ""
+        self.probability = 0
         self.title = ""
         self.parameters()
         self.print_method_names()
         self.create()
-        self.plot_grid(save_path=f"{title} - P{self.probability}.png")
+        self.plot_grid(save_path=f"{title}-{self.width}x{self.steps}-{self.starting_label}-P{self.probability}.png")
 
     def parameters(self):
         while True:
             try:
                 self.width = int(input("Width: "))
                 if self.width <= 0 or self.width % 2 == 0:
-                    print("Width is not a positive odd number.")
+                    print("input is not a positive odd integer.")
                 else:
                     break
             except ValueError:
@@ -52,17 +53,24 @@ class automata():
             try:
                 self.starting_state = int(input("where to start? 1: left corner, 2: middle, 3: right corner"))
                 if self.starting_state not in [1, 2, 3]:
-                    print("Starting_state is not a valid integer for starting_state.")
+                    print("invalid input, please try again.")
                 else:
+                    if self.starting_state == 1:
+                        self.starting_label = "L"
+                    elif self.starting_state == 2:
+                        self.starting_label = "M"
+                    elif self.starting_state == 3:
+                        self.starting_label = "R"
+
                     break
             except ValueError:
-                print("Please enter a valid integer for starting_state.")
+                print("Please enter a valid integer for the start position.")
 
         while True:
             try:
                 self.probability = float(input("Probability: "))
                 if self.probability <= 0 or self.probability > 1:
-                    print("Probability is not a valid float for probability. has to be >0 and <=1.")
+                    print("invalid input. Probability has to be >0 and <=1.")
                 else:
                     break
             except ValueError:
@@ -238,6 +246,7 @@ class automata():
                 # Remove 'rule' prefix and add to the list
                 method_names.append(attr_name[len('rule_'):])
 
+        method_names.sort(key=lambda name: int(name))
         # Print the method names separated by commas
         print("available rules:" + ", ".join(method_names))
 
