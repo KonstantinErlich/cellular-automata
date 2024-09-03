@@ -11,7 +11,6 @@ def running_in_terminal():
     # Check if sys.stdin is a terminal
     return sys.stdin.isatty() and sys.stdout.isatty()
 
-
 # Use TkAgg backend only if running in a terminal
 if running_in_terminal():
     matplotlib.use('TkAgg')
@@ -21,16 +20,25 @@ class Automata:
     def __init__(self):
         self.width = 0
         self.steps = 0
-        self.starting_state = 1
-        self.starting_label = ""
+        self.start_pos = 1
+        self.start_label = ""
         self.probability = 0
         self.state_to_label = {1: "L", 2: "M", 3: "R"}
-
-        self.rule_map = self.build_rule_map()
+        self.rules = {
+            1: "000",
+            2: "001",
+            3: "001 000",
+            22: "010 001 100",
+            45: "101 011 010 000",
+            86: "110 100 010 001",
+            105: "110 101 011 000",
+            107: "110 101 011 001 000",
+            225: "111 110 101 000"
+        }
         self.parameters()
         self.rule_selection()
         self.plot_grid(
-            save_path=f"rule-{self.code}-{self.width}x{self.steps}-{self.starting_label}-P{self.probability}.png")
+            save_path=f"rule-{self.code}-{self.width}x{self.steps}-{self.start_label}-P{self.probability}.png")
 
     def parameters(self):
         while True:
@@ -55,9 +63,9 @@ class Automata:
 
         while True:
             try:
-                self.starting_state = int(input("Where to start? 1: left corner, 2: middle, 3: right corner "))
-                if self.starting_state in self.state_to_label:
-                    self.starting_label = self.state_to_label[self.starting_state]
+                self.start_pos = int(input("Where to start? 1: left corner, 2: middle, 3: right corner "))
+                if self.start_pos in self.state_to_label:
+                    self.start_label = self.state_to_label[self.start_pos]
                     break
                 else:
                     print("Invalid input, please try again.")
@@ -81,18 +89,12 @@ class Automata:
             2: self.width // 2,  # Middle
             3: self.width - 1  # Right corner
         }
-        self.grid[0, starting_positions[self.starting_state]] = 1
-
-    def condition(self, i, j, a, b, c):
-        # the indexes in grid[i,j] mean the following:
-        # i is the time step, goes down in the plot.
-        # j is the position of the cell, j+1 is right neighbor, j-1 is left neighbor
-        return self.grid[i - 1, j - 1] == a and self.grid[i - 1, j] == b and self.grid[i - 1, j + 1] == c
+        self.grid[0, starting_positions[self.start_pos]] = 1
 
     def plot_grid(self, save_path=None):
         plt.figure(figsize=(40, 40))
         plt.imshow(self.grid, cmap='binary', interpolation='nearest')
-        plt.title(f"1D Cellular Automaton - rule {self.code} - Probablity: {self.probability}", fontsize=50)
+        plt.title(f"1D Cellular Automaton - rule {self.code} - Probability: {self.probability}", fontsize=50)
         plt.xticks([])
         plt.yticks(fontsize=45)
         plt.ylabel("Steps", fontsize=50)
@@ -113,7 +115,7 @@ class Automata:
         return rule_map
 
     def print_available_rules(self):
-        rule_numbers = sorted(self.rule_map.keys())
+        rule_numbers = sorted(self.rules.keys())
         print("Available rules: " + ", ".join(map(str, rule_numbers)))
 
     def rule_selection(self):
@@ -122,8 +124,8 @@ class Automata:
         while True:
             try:
                 self.code = int(input("Type the number of the rule you want to plot: "))
-                if self.code in self.rule_map:
-                    self.loop_over_grid(self.rule_map[self.code])
+                if self.code in self.rules:
+                    self.loop_over_grid(self.code)
                     break
                 else:
                     print("Invalid value, rule not found")
@@ -133,54 +135,20 @@ class Automata:
     def loop_over_grid(self, rule):
         for i in range(1, self.steps):
             for j in range(1, self.width - 1):
-                if rule(i, j):
+                if self.apply_rule(i,j, rule):
                     self.grid[i, j] = int(random.random() < self.probability)
 
-    # RULES:
-    def rule_1(self, i, j):
-        return self.condition(i, j, 0, 0, 0)
+    def apply_rule(self, i, j, num):
+        str = self.rules[num].replace(" ", "")
+        for k in range(0, len(str), 3):
+             if self.condition(i, j, int(str[k]), int(str[k+1]), int(str[k+2])):
+                return True
 
-    def rule_2(self, i, j):
-        return self.grid[i - 1, j + 1] != 0
-
-    def rule_3(self, i, j):
-        return self.grid[i - 1, j - 1] == 0 and self.grid[i - 1, j] == 0
-
-    def rule_22(self, i, j):
-        return (self.condition(i, j, 0, 1, 0) or
-                self.condition(i, j, 0, 0, 1) or
-                self.condition(i, j, 1, 0, 0))
-
-    def rule_45(self, i, j):
-        return (self.condition(i, j, 1, 0, 1) or
-                self.condition(i, j, 0, 1, 1) or
-                self.condition(i, j, 0, 1, 0) or
-                self.condition(i, j, 0, 0, 0))
-
-    def rule_86(self, i, j):
-        return (self.condition(i, j, 1, 1, 0) or
-                self.condition(i, j, 1, 0, 0) or
-                self.condition(i, j, 0, 1, 0) or
-                self.condition(i, j, 0, 0, 1))
-
-    def rule_107(self, i, j):
-        return (self.condition(i, j, 1, 1, 0) or
-                self.condition(i, j, 1, 0, 1) or
-                self.condition(i, j, 0, 1, 1) or
-                self.condition(i, j, 0, 0, 1) or
-                self.condition(i, j, 0, 0, 0))
-
-    def rule_105(self, i, j):
-        return (self.condition(i, j, 1, 1, 0) or
-                self.condition(i, j, 1, 0, 1) or
-                self.condition(i, j, 0, 1, 1) or
-                self.condition(i, j, 0, 0, 0))
-
-    def rule_225(self, i, j):
-        return (self.condition(i, j, 1, 1, 1) or
-                self.condition(i, j, 1, 1, 0) or
-                self.condition(i, j, 1, 0, 1) or
-                self.condition(i, j, 0, 0, 0))
-
+    # the indexes in grid[i,j] mean the following:
+    # i is the time step, goes down in the plot.
+    # j is the position of the cell, j+1 is right neighbor, j-1 is left neighbor
+    def condition(self, i, j, a, b, c):
+        return self.grid[i - 1, j - 1] == a and self.grid[i - 1, j] == b and self.grid[i - 1, j + 1] == c
 
 ca = Automata()
+
