@@ -23,10 +23,11 @@ class automata():
         self.starting_label = ""
         self.probability = 0
         self.title = ""
+
+        self.rule_map = self.build_rule_map()
         self.parameters()
-        self.print_method_names()
-        self.create()
-        self.plot_grid(save_path=f"{title}-{self.width}x{self.steps}-{self.starting_label}-P{self.probability}.png")
+        self.interface()
+        self.plot_grid(save_path=f"{self.title}-{self.width}x{self.steps}-{self.starting_label}-P{self.probability}.png")
 
     def parameters(self):
         while True:
@@ -76,7 +77,7 @@ class automata():
             except ValueError:
                 print("Please enter a valid float for probability.")
 
-    def grid(self):
+    def make_grid(self):
         self.grid = np.zeros((self.steps, self.width), dtype=int)
         self.midpoint = self.width // 2
         if self.starting_state == 1:
@@ -85,110 +86,24 @@ class automata():
             self.grid[0, self.midpoint] = 1
         if self.starting_state == 3:
             self.grid[0, self.width-1] = 1
+
+
     def condition(self, i, j, a, b, c):
         # the indexes in grid[i,j] mean the following:
         # i is the time step, goes down in the plot.
         # j is the position of the cell, j+1 is right neighbor, j-1 is left neighbor
         return self.grid[i - 1, j - 1] == a and self.grid[i - 1, j] == b and self.grid[i - 1, j + 1] == c
 
-    def set_grid(self, i,j):
+    def set_cell(self, i,j):
         if random.random() < self.probability:
             self.grid[i, j] = 1
         else:
             self.grid[i, j] = 0
 
-    def rule_1(self):
-        global title
-        title = "rule 1"
-        for i in range(1, self.steps):
-            for j in range(1, self.width - 1):
-                if self.condition(i, j, 0, 0, 0):
-                    self.set_grid(i,j)
-
-    def rule_2(self):
-        global title
-        title = "rule 2"
-        for i in range(1, self.steps):
-            for j in range(1, self.width - 1):
-                if self.grid[i - 1, j + 1] != 0:
-                    self.set_grid(i,j)
-
-    def rule_3(self):
-        global title
-        title = "rule 3"
-        for i in range(1, self.steps):
-            for j in range(1, self.width - 1):
-                if self.grid[i - 1, j - 1] == 0 and self.grid[i - 1, j] == 0:
-                    self.set_grid(i,j)
-    def rule_45(self):
-        global title
-        title = "rule 45"
-        for i in range(1, self.steps):
-            for j in range(1, self.width - 1):
-                if (self.condition(i, j, 1, 0, 1) or
-                        self.condition(i, j, 0, 1, 1) or
-                         self.condition(i, j, 0, 1, 0) or
-                          self.condition(i, j, 0, 0, 0)):
-                    self.set_grid(i,j)
-    def rule_86(self):
-        global title
-        title = "rule 86"
-        for i in range(1, self.steps):
-            for j in range(1, self.width - 1):
-                if (self.condition(i, j, 1, 1, 0) or
-                        self.condition(i, j, 1, 0, 0) or
-                        self.condition(i, j, 0, 1, 0) or
-                        self.condition(i, j, 0, 0, 1)):
-                    self.set_grid(i, j)
-    def rule_22(self):
-        global title
-        title = "rule 22"
-        for i in range(1, self.steps):
-            for j in range(1, self.width - 1):
-                if (self.condition(i, j, 0, 1, 0) or
-                        self.condition(i, j, 0, 0, 1) or
-                        self.condition(i, j, 1, 0, 0)):
-                    self.set_grid(i,j)
-
-    def rule_107(self):
-        global title
-        title = "rule 107"
-        for i in range(1, self.steps):
-            for j in range(1, self.width - 1):
-                if (self.condition(i, j, 1, 1, 0) or
-                        self.condition(i, j, 1, 0, 1) or
-                        self.condition(i, j, 0, 1, 1) or
-                        self.condition(i, j, 0, 0, 1) or
-                        self.condition(i, j, 0, 0, 0)):
-                    self.set_grid(i,j)
-
-    def rule_105(self):
-        global title
-        title = "rule 105"
-        for i in range(1, self.steps):
-            for j in range(1, self.width - 1):
-                if (self.condition(i, j, 1, 1, 0) or
-                        self.condition(i, j, 1, 0, 1) or
-                        self.condition(i, j, 0, 1, 1) or
-                        self.condition(i, j, 0, 0, 0)):
-                    self.set_grid(i,j)
-
-    def rule_225(self):
-        global title
-        title = "rule 225"
-        for i in range(1, self.steps):
-            for j in range(1, self.width - 1):
-                if (self.condition(i, j, 1, 1, 1) or
-                        self.condition(i, j, 1, 1, 0) or
-                        self.condition(i, j, 1, 0, 1) or
-                        self.condition(i, j, 0, 0, 0)):
-                    self.set_grid(i,j)
-
-
     def plot_grid(self, save_path=None):
         plt.figure(figsize=(40, 40))
         plt.imshow(self.grid, cmap='binary', interpolation='nearest')
-        plt.title(f"1D Cellular Automaton - {title} - Probablity: {self.probability}", fontsize=50)
+        plt.title(f"1D Cellular Automaton - {self.title} - Probablity: {self.probability}", fontsize=50)
         plt.xticks([])
         plt.yticks(fontsize=45)
         plt.ylabel("Steps", fontsize=50)
@@ -199,56 +114,89 @@ class automata():
         plt.show()
 
 
-
-    def create(self):
-        self.grid()
-        while True:
-            self.code = int(input("type the number of the rule you want to plot: "))
-            match self.code:
-                case 1:
-                    self.rule_1()
-                    break
-                case 2:
-                    self.rule_2()
-                    break
-                case 3:
-                    self.rule_3()
-                    break
-                case 22:
-                    self.rule_22()
-                    break
-                case 107:
-                    self.rule_107()
-                    break
-                case 45:
-                    self.rule_45()
-                    break
-                case 86:
-                    self.rule_86()
-                    break
-                case 105:
-                    self.rule_105()
-                    break
-                case 225:
-                    self.rule_225()
-                    break
-                case _:
-                    print("invalid value, rule not found")
-
-    def print_method_names(self):
-        method_names = []
-        # Iterate over the attributes of the class
+    def build_rule_map(self):
+        rule_map = {}
         for attr_name in dir(self):
-            # Get the attribute value
             attr_value = getattr(self, attr_name)
-            # Check if the attribute is callable and starts with 'rule'
-            if callable(attr_value) and not attr_name.startswith('__') and attr_name.startswith('rule'):
-                # Remove 'rule' prefix and add to the list
-                method_names.append(attr_name[len('rule_'):])
+            if callable(attr_value) and attr_name.startswith('rule_'):
+                rule_number = attr_name[len('rule_'):]
+                if rule_number.isdigit():
+                    rule_map[int(rule_number)] = attr_value
+        return rule_map
 
-        method_names.sort(key=lambda name: int(name))
-        # Print the method names separated by commas
-        print("available rules:" + ", ".join(method_names))
+    def print_available_rules(self):
+        rule_numbers = sorted(self.rule_map.keys())
+        print("Available rules: " + ", ".join(map(str, rule_numbers)))
 
+    def interface(self):
+        self.make_grid()
+        self.print_available_rules()
+        while True:
+            try:
+                self.code = int(input("Type the number of the rule you want to plot: "))
+                if self.code in self.rule_map:
+                    self.loop_over_grid(self.rule_map[self.code])
+                    break
+                else:
+                    print("Invalid value, rule not found")
+            except ValueError:
+                print("Please enter a valid integer")
+
+
+
+    def loop_over_grid(self, rule):
+        for i in range(1, self.steps):
+            for j in range(1, self.width - 1):
+                if rule(i, j):
+                    self.set_cell(i, j)
+    #RULES:
+    def rule_1(self, i,j):
+        self.title = "rule 1"
+        return self.condition(i, j, 0, 0, 0)
+    def rule_2(self,i, j):
+        self.title = "rule 2"
+        return self.grid[i - 1, j + 1] != 0
+    def rule_3(self,i, j):
+        self.title = "rule 3"
+        return self.grid[i - 1, j - 1] == 0 and self.grid[i - 1, j] == 0
+
+    def rule_22(self,i, j):
+        self.title = "rule 22"
+        return (self.condition(i, j, 0, 1, 0) or
+                        self.condition(i, j, 0, 0, 1) or
+                        self.condition(i, j, 1, 0, 0))
+
+    def rule_45(self, i, j):
+        self.title = "rule 45"
+        return (self.condition(i, j, 1, 0, 1) or
+                self.condition(i, j, 0, 1, 1) or
+                self.condition(i, j, 0, 1, 0) or
+                self.condition(i, j, 0, 0, 0))
+    def rule_86(self, i,j):
+        self.title = "rule 86"
+        return (self.condition(i, j, 1, 1, 0) or
+                self.condition(i, j, 1, 0, 0) or
+                self.condition(i, j, 0, 1, 0) or
+                self.condition(i, j, 0, 0, 1))
+
+    def rule_107(self, i,j):
+        self.title = "rule 107"
+        return (self.condition(i, j, 1, 1, 0) or
+                        self.condition(i, j, 1, 0, 1) or
+                        self.condition(i, j, 0, 1, 1) or
+                        self.condition(i, j, 0, 0, 1) or
+                        self.condition(i, j, 0, 0, 0))
+    def rule_105(self,i,j):
+        self.title = "rule 105"
+        return (self.condition(i, j, 1, 1, 0) or
+                        self.condition(i, j, 1, 0, 1) or
+                        self.condition(i, j, 0, 1, 1) or
+                        self.condition(i, j, 0, 0, 0))
+    def rule_225(self, i,j):
+        self.title = "rule 225"
+        return(self.condition(i, j, 1, 1, 1) or
+                        self.condition(i, j, 1, 1, 0) or
+                        self.condition(i, j, 1, 0, 1) or
+                        self.condition(i, j, 0, 0, 0))
 
 ca = automata()
