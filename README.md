@@ -1,6 +1,6 @@
 This script plots a cellular automation using defined rules [https://atlas.wolfram.com/TOC/TOC_101.html].
 
-I've programmed only some of the rules. To choose the rule to be plotted, type the number of the available rules.
+I've programmed only some of the rules. To choose the rule to be plotted, type the number of one of the available rules.
 
 The following options can be selected: width, number of steps, starting position and probability of a given tile to become black(meaning that if a rule says that a tile is to become black there is now the additional probability whether this actually happens. The standard, optimal case is a probability = 1.)
 
